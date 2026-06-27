@@ -1,0 +1,332 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Marcellus&family=Cinzel:wght@500;600&family=Great+Vibes&family=Inter:wght@300;400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ *
+ * Theme tokens. The active theme is set via `data-theme` on <html>.  *
+ * Swap the theme in config/wedding.ts.                               *
+ * ------------------------------------------------------------------ */
+
+:root,
+[data-theme="royal"] {
+  --bg: #1c0a10;
+  --surface: #2a0f17;
+  --ink: #f6ead7;
+  --muted: #c9a98f;
+  --primary: #7a1023;
+  --primary-ink: #fff4e6;
+  --accent: #d4af37;
+  --accent-2: #b8860b;
+  --line: rgba(212, 175, 55, 0.28);
+  --shadow: rgba(0, 0, 0, 0.6);
+
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-script: "Great Vibes", cursive;
+}
+
+[data-theme="minimal"] {
+  --bg: #fbf8f3;
+  --surface: #ffffff;
+  --ink: #2c2620;
+  --muted: #8c8175;
+  --primary: #b76e79;
+  --primary-ink: #ffffff;
+  --accent: #c9a227;
+  --accent-2: #d9b65f;
+  --line: rgba(201, 162, 39, 0.35);
+  --shadow: rgba(120, 100, 70, 0.22);
+
+  --font-display: "Cormorant Garamond", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-script: "Great Vibes", cursive;
+}
+
+[data-theme="floral"] {
+  --bg: #fdf4f6;
+  --surface: #fffdfb;
+  --ink: #4a3b46;
+  --muted: #a78a98;
+  --primary: #c98aa6;
+  --primary-ink: #ffffff;
+  --accent: #d9a566;
+  --accent-2: #e7c39a;
+  --line: rgba(201, 138, 166, 0.35);
+  --shadow: rgba(160, 110, 140, 0.22);
+
+  --font-display: "Marcellus", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-script: "Great Vibes", cursive;
+}
+
+/* Emerald — regal botanical: deep forest green & antique gold. */
+[data-theme="emerald"] {
+  --bg: #0c1f17;
+  --surface: #11291e;
+  --ink: #eef3e9;
+  --muted: #a7c0a8;
+  --primary: #0f5132;
+  --primary-ink: #f3fbef;
+  --accent: #c9a227;
+  --accent-2: #9c7b1f;
+  --line: rgba(201, 162, 39, 0.28);
+  --shadow: rgba(0, 0, 0, 0.6);
+
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-script: "Great Vibes", cursive;
+}
+
+/* Midnight — starlit sapphire & platinum, soft and dreamy. */
+[data-theme="midnight"] {
+  --bg: #0b1020;
+  --surface: #121a30;
+  --ink: #eaf0fb;
+  --muted: #9fb0cf;
+  --primary: #1e3a8a;
+  --primary-ink: #f2f6ff;
+  --accent: #c3cee2;
+  --accent-2: #8e9bb5;
+  --line: rgba(199, 210, 232, 0.24);
+  --shadow: rgba(0, 0, 0, 0.6);
+
+  --font-display: "Cormorant Garamond", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-script: "Great Vibes", cursive;
+}
+
+/* Noir — modern monochrome luxe: onyx & champagne. */
+[data-theme="noir"] {
+  --bg: #121212;
+  --surface: #1b1b1b;
+  --ink: #f4efe6;
+  --muted: #a89f92;
+  --primary: #2a2a2a;
+  --primary-ink: #f4efe6;
+  --accent: #d8c08a;
+  --accent-2: #b8995f;
+  --line: rgba(216, 192, 138, 0.24);
+  --shadow: rgba(0, 0, 0, 0.7);
+
+  --font-display: "Cinzel", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-script: "Great Vibes", cursive;
+}
+
+/* Sage — botanical garden: soft sage green & cream with bronze. */
+[data-theme="sage"] {
+  --bg: #f3f5ee;
+  --surface: #fbfcf8;
+  --ink: #34402f;
+  --muted: #7c8a72;
+  --primary: #6b7f5e;
+  --primary-ink: #ffffff;
+  --accent: #a98b5d;
+  --accent-2: #c4ab84;
+  --line: rgba(107, 127, 94, 0.30);
+  --shadow: rgba(90, 100, 70, 0.20);
+
+  --font-display: "Cormorant Garamond", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-script: "Great Vibes", cursive;
+}
+
+/* Terracotta — warm earthy boho-luxe: terracotta, sand & amber. */
+[data-theme="terracotta"] {
+  --bg: #fbf3ec;
+  --surface: #fffaf5;
+  --ink: #4d3a2f;
+  --muted: #a78a76;
+  --primary: #c06a4d;
+  --primary-ink: #ffffff;
+  --accent: #cf9a4e;
+  --accent-2: #e0bb84;
+  --line: rgba(192, 106, 77, 0.30);
+  --shadow: rgba(150, 90, 60, 0.20);
+
+  --font-display: "Marcellus", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-script: "Great Vibes", cursive;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+/* When Lenis is driving the scroll it handles easing itself; disable the
+   native CSS smooth scroll so anchor jumps don't double-animate. */
+html.lenis {
+  scroll-behavior: auto;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Subtle textured background that adapts to the theme. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, color-mix(in srgb, var(--primary) 22%, transparent), transparent 55%);
+  pointer-events: none;
+}
+
+/* Per-wedding theming: the `data-theme` lives on a wrapper (not <html>) so each
+   tenant can use a different palette. This class repaints the page background
+   from that wrapper's theme variables, mirroring the body styling above. */
+.theme-surface {
+  position: relative;
+  background-color: var(--bg);
+  color: var(--ink);
+}
+.theme-surface::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, color-mix(in srgb, var(--primary) 22%, transparent), transparent 55%);
+  pointer-events: none;
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+  }
+
+  .eyebrow {
+    @apply font-body text-xs font-medium uppercase tracking-[0.35em] text-accent;
+  }
+
+  .display {
+    font-family: var(--font-display);
+  }
+
+  .script {
+    font-family: var(--font-script);
+  }
+
+  .card {
+    @apply rounded-xl2 border shadow-soft backdrop-blur-sm;
+    background-color: color-mix(in srgb, var(--surface) 92%, transparent);
+    border-color: var(--line);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 font-body text-sm font-semibold tracking-wide transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #1a1206;
+    box-shadow: 0 10px 30px -10px var(--shadow);
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3 font-body text-sm font-medium transition-all duration-300;
+    border-color: var(--line);
+    color: var(--ink);
+  }
+  .btn-ghost:hover {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+
+  .field {
+    @apply w-full rounded-xl border bg-transparent px-4 py-3 font-body text-base outline-none transition-colors;
+    border-color: var(--line);
+    color: var(--ink);
+  }
+  .field::placeholder {
+    color: var(--muted);
+  }
+  .field:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+
+  .label {
+    @apply mb-1.5 block font-body text-xs font-medium uppercase tracking-[0.2em];
+    color: var(--muted);
+  }
+}
+
+/* Ornamental gold divider used between sections. */
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--accent);
+}
+.divider::before,
+.divider::after {
+  content: "";
+  height: 1px;
+  width: min(120px, 22vw);
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+.divider::after {
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+/* Theme-aware translucent tints (Tailwind opacity modifiers can't apply to
+   our CSS-variable colors, so we provide explicit color-mix utilities). */
+.tint-accent {
+  background-color: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.tint-accent-strong {
+  background-color: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.tint-primary {
+  background-color: color-mix(in srgb, var(--primary) 28%, transparent);
+}
+.rule-accent {
+  background-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.gold-text {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Reveal-on-scroll helper (toggled by IntersectionObserver). */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px) scale(0.985);
+  will-change: opacity, transform;
+  transition: opacity 1s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}

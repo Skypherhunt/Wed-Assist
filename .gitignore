@@ -1,0 +1,11 @@
+/node_modules
+/.next
+/out
+/build
+.env*.local
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+
+# Internal refactor notes — not part of the published portfolio
+WED_ASSIST_REFACTOR.md

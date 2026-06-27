@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3a1d2e"/>
+      <stop offset="1" stop-color="#c98aa6"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#g)"/>
+  <g fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1.5">
+    <circle cx="300" cy="270" r="70"/>
+    <path d="M270 270 l30 30 l30 -55"/>
+  </g>
+  <text x="300" y="540" text-anchor="middle" fill="#fff" fill-opacity="0.9"
+    font-family="Georgia, serif" font-size="30" letter-spacing="1">First Trip</text>
+  <text x="300" y="570" text-anchor="middle" fill="#fff" fill-opacity="0.5"
+    font-family="Arial, sans-serif" font-size="13" letter-spacing="3">REPLACE WITH PHOTO</text>
+</svg>
