@@ -22,16 +22,23 @@ function StatCard({
 }
 
 export default function DashboardView({ data }: { data: DashboardData }) {
-  const { config, slug, rsvps, inviteLinks } = data;
+  const { config, slug, rsvps, inviteLinks, guests } = data;
   const attending = rsvps.filter((r) => r.attending);
   const confirmedPeople = attending.reduce((s, r) => s + (r.party_size || 0), 0);
   const declined = rsvps.length - attending.length;
-  const groupLinks = inviteLinks.filter((l) => l.kind === "group").length;
-  const personalLinks = inviteLinks.length - groupLinks;
 
-  // Attending head-count per invite link, for the "by source" breakdown.
+  // Roster tracking: who's still pending. A guest is "replied" once a response
+  // is stamped with their guest_id.
+  const repliedGuestIds = new Set(
+    rsvps.map((r) => r.guest_id).filter(Boolean) as string[]
+  );
+  const pendingGuests = guests.filter((g) => !repliedGuestIds.has(g.id)).length;
+
+  // "By source" covers only unlisted responses (open links / direct) — roster
+  // guests are tracked on the guest-list page, not lumped under "Direct".
   const headsByLink = new Map<string | null, number>();
   for (const r of attending) {
+    if (r.guest_id) continue; // roster guest — counted on the guest list
     const k = r.invite_link_id;
     headsByLink.set(k, (headsByLink.get(k) || 0) + (r.party_size || 0));
   }
@@ -65,8 +72,11 @@ export default function DashboardView({ data }: { data: DashboardData }) {
             <Link href="/dashboard/edit" className="btn-primary">
               Edit content
             </Link>
+            <Link href="/dashboard/guests" className="btn-ghost">
+              Guest list
+            </Link>
             <Link href="/dashboard/invites" className="btn-ghost">
-              Manage invites
+              Open links
             </Link>
             <ExportButtons
               slug={slug}
@@ -85,38 +95,53 @@ export default function DashboardView({ data }: { data: DashboardData }) {
         </div>
 
         <>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              <StatCard
+                label="On Guest List"
+                value={String(guests.length)}
+                hint={
+                  pendingGuests > 0
+                    ? `${pendingGuests} not replied yet`
+                    : guests.length > 0
+                    ? "everyone has replied"
+                    : "add your guests"
+                }
+              />
               <StatCard
                 label="Confirmed Guests"
                 value={String(confirmedPeople)}
                 hint={`${attending.length} accepted invitation(s)`}
               />
               <StatCard
-                label="Invite Links"
-                value={String(inviteLinks.length)}
-                hint={`${groupLinks} group · ${personalLinks} personal`}
-              />
-              <StatCard
                 label="Total Responses"
                 value={String(rsvps.length)}
                 hint={`${declined} regret(s)`}
+              />
+              <StatCard
+                label="Open Links"
+                value={String(inviteLinks.length)}
+                hint="forwardable / unlisted"
               />
             </div>
 
             <section className="card mt-6 p-7">
               <div className="mb-4 flex items-center justify-between gap-4">
-                <h2 className="display text-2xl">Confirmed by invite source</h2>
+                <h2 className="display text-2xl">Confirmed via open links</h2>
                 <Link
-                  href="/dashboard/invites"
+                  href="/dashboard/guests"
                   className="text-accent hover:underline font-body text-sm"
                 >
-                  Manage invites →
+                  Manage guest list →
                 </Link>
               </div>
               {sources.length === 0 ? (
                 <p className="font-body text-sm text-muted">
-                  No confirmations yet. Create shareable invite links to hand to
-                  your sub-hosts and track who they bring.
+                  Roster guests are tracked on your{" "}
+                  <Link href="/dashboard/guests" className="text-accent hover:underline">
+                    guest list
+                  </Link>
+                  . This panel only counts confirmations that came in through a
+                  forwardable open link (no link = “Direct”).
                 </p>
               ) : (
                 <ul className="divide-y" style={{ borderColor: "var(--line)" }}>

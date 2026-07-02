@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import type { InviteLink } from "@/lib/supabase";
-import InviteManager, { type Responder } from "@/components/InviteManager";
+import type { Guest } from "@/lib/supabase";
+import GuestListManager, { type GuestReply } from "@/components/GuestListManager";
 
-// Reads the session + the couple's private links/responses, so render per-request.
+// Reads the session + the couple's private roster/responses, so render per-request.
 export const dynamic = "force-dynamic";
 
-export default async function InvitesPage() {
+export default async function GuestsPage() {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase) {
@@ -16,7 +16,8 @@ export default async function InvitesPage() {
         <div className="card max-w-md p-8 text-center">
           <h1 className="display text-2xl">Backend not connected</h1>
           <p className="mt-3 font-body text-sm text-muted">
-            Add your Supabase keys to <code>.env.local</code> to manage invites.
+            Add your Supabase keys to <code>.env.local</code> to manage your
+            guest list.
           </p>
           <Link href="/dashboard" className="btn-ghost mt-6">
             ← Dashboard
@@ -42,24 +43,24 @@ export default async function InvitesPage() {
 
   if (!wedding) redirect("/login");
 
-  const [linksRes, rsvpRes] = await Promise.all([
+  const [guestsRes, repliesRes] = await Promise.all([
     supabase
-      .from("invite_links")
+      .from("guests")
       .select("*")
       .eq("wedding_id", wedding.id)
       .order("created_at", { ascending: true }),
     supabase
       .from("rsvps")
-      .select("id, name, attending, party_size, invite_link_id")
+      .select("guest_id, attending, party_size")
       .eq("wedding_id", wedding.id)
-      .order("created_at", { ascending: false }),
+      .not("guest_id", "is", null),
   ]);
 
   return (
-    <InviteManager
+    <GuestListManager
       slug={wedding.slug as string}
-      links={(linksRes.data as InviteLink[]) ?? []}
-      responders={(rsvpRes.data as Responder[]) ?? []}
+      guests={(guestsRes.data as Guest[]) ?? []}
+      replies={(repliesRes.data as GuestReply[]) ?? []}
     />
   );
 }

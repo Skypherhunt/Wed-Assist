@@ -26,9 +26,19 @@ export interface Rsvp {
   party_size: number;
   attending: boolean;
   message: string | null;
-  phone: string | null;
   // The invite link this response came through (null = the plain "Direct" link).
   invite_link_id: string | null;
+  // The roster guest this response belongs to (null = unlisted: open-link/direct).
+  guest_id: string | null;
+  created_at: string;
+}
+
+export interface Guest {
+  id: string;
+  wedding_id: string;
+  name: string;
+  expected_party_size: number;
+  token: string;
   created_at: string;
 }
 
@@ -51,7 +61,6 @@ export async function submitRsvp(input: {
   party_size: number;
   attending: boolean;
   message?: string;
-  phone?: string;
   // Set when the guest arrived via a shared invite link; null/omitted = Direct.
   invite_link_id?: string | null;
 }): Promise<{ error: string | null }> {
@@ -62,8 +71,28 @@ export async function submitRsvp(input: {
     party_size: input.party_size,
     attending: input.attending,
     message: input.message || null,
-    phone: input.phone || null,
     invite_link_id: input.invite_link_id || null,
+  });
+  return { error: error ? error.message : null };
+}
+
+// A roster guest's RSVP, gated by their private token. Goes through the
+// submit_guest_rsvp RPC (SECURITY DEFINER), which upserts a single response per
+// guest — so submitting again edits the existing reply instead of duplicating.
+export async function submitGuestRsvp(input: {
+  wedding_id: string;
+  token: string;
+  attending: boolean;
+  party_size: number;
+  message?: string;
+}): Promise<{ error: string | null }> {
+  if (!supabase) return { error: NOT_CONFIGURED };
+  const { error } = await supabase.rpc("submit_guest_rsvp", {
+    p_wedding_id: input.wedding_id,
+    p_token: input.token,
+    p_attending: input.attending,
+    p_party_size: input.party_size,
+    p_message: input.message || null,
   });
   return { error: error ? error.message : null };
 }

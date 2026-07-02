@@ -49,7 +49,7 @@ export const defaultWeddingConfig: WeddingConfig = {
   hashtag: "#AaravWedsDiya",
   tagline: "Together with our families, we invite you to celebrate our union.",
   heroDate: "12 December 2026",
-  heroImage: "/hero.svg",
+  heroImage: "/hero.jpg",
 
   events: [
     {
@@ -87,12 +87,12 @@ export const defaultWeddingConfig: WeddingConfig = {
   ],
 
   gallery: [
-    { src: "/gallery/1.svg", caption: "The proposal" },
-    { src: "/gallery/2.svg", caption: "Our first trip" },
-    { src: "/gallery/3.svg", caption: "Engagement day" },
-    { src: "/gallery/4.svg", caption: "Forever begins" },
-    { src: "/gallery/5.svg", caption: "Just us" },
-    { src: "/gallery/6.svg", caption: "Pre-wedding" },
+    { src: "/gallery/1.jpg", caption: "The proposal" },
+    { src: "/gallery/2.jpg", caption: "Our first trip" },
+    { src: "/gallery/3.jpg", caption: "Engagement day" },
+    { src: "/gallery/4.jpg", caption: "Forever begins" },
+    { src: "/gallery/5.jpg", caption: "Just us" },
+    { src: "/gallery/6.jpg", caption: "Pre-wedding" },
   ],
 };
 

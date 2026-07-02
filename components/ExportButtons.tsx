@@ -53,13 +53,12 @@ export default function ExportButtons({
       r.name,
       r.attending ? "Attending" : "Regrets",
       r.attending ? r.party_size : 0,
-      r.phone ?? "",
       r.invite_link_id ? linkLabel.get(r.invite_link_id) ?? "(deleted link)" : "Direct",
       r.message ?? "",
       fmtDate(r.created_at),
     ]);
     const csv = toCsv(
-      ["Name", "Status", "Party Size", "Phone", "Invite Source", "Message", "Submitted"],
+      ["Name", "Status", "Party Size", "Invite Source", "Message", "Submitted"],
       rows
     );
     download(`guests-${slug}.csv`, csv);

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Marcellus&family=Cinzel:wght@500;600&family=Great+Vibes&family=Inter:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Playfair+Display:wght@500;600;700&family=Marcellus&family=Cinzel:wght@500;600&family=Great+Vibes&family=Inter:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -328,5 +328,129 @@ body::before {
   }
   html {
     scroll-behavior: auto;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Marketing landing page ("/") only — ported from the standalone      *
+ * wed-assist-landing Vite project. Scoped by usage to components/     *
+ * LandingPage.tsx; none of these class names are used elsewhere.      *
+ * ------------------------------------------------------------------ */
+
+.landing-page {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+.landing-page ::selection {
+  background-color: #b76e79;
+  color: #ffffff;
+}
+
+@layer components {
+  .noise-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.05;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .magnetic-btn {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .magnetic-btn:hover {
+    transform: scale(1.03) translateY(-1px);
+  }
+  .magnetic-btn:active {
+    transform: scale(0.98);
+  }
+  .magnetic-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0));
+    transform: translateY(100%);
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .magnetic-btn:hover::before {
+    transform: translateY(0);
+  }
+  .lift-on-hover {
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .lift-on-hover:hover {
+    transform: translateY(-2px);
+  }
+  .gradient-text {
+    background: linear-gradient(135deg, #b76e79 0%, #94515c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .glass {
+    background: rgba(250, 246, 241, 0.72);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(183, 110, 121, 0.16);
+  }
+  .glass-dark {
+    background: rgba(46, 29, 36, 0.72);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .ring-pulse {
+    box-shadow: 0 0 0 0 rgba(183, 110, 121, 0.6);
+    animation: ring-pulse 2s infinite;
+  }
+  @keyframes ring-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(183, 110, 121, 0.6);
+    }
+    70% {
+      box-shadow: 0 0 0 14px rgba(183, 110, 121, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(183, 110, 121, 0);
+    }
+  }
+  .hairline {
+    border: 1px solid rgba(36, 28, 30, 0.12);
+  }
+  .edge-shadow {
+    box-shadow: 10px 10px 0 rgba(183, 110, 121, 0.14);
+  }
+  .edge-shadow-gold {
+    box-shadow: 10px 10px 0 rgba(195, 155, 78, 0.18);
+  }
+  .paper {
+    background: radial-gradient(120% 120% at 0% 0%, rgba(195, 155, 78, 0.06), transparent 45%),
+      radial-gradient(120% 120% at 100% 100%, rgba(183, 110, 121, 0.07), transparent 45%), #faf6f1;
+  }
+  .index-num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@layer utilities {
+  .mask-line {
+    overflow: hidden;
+    display: block;
   }
 }

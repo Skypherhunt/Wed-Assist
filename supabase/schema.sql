@@ -54,10 +54,9 @@ create table if not exists public.invite_links (
 create index if not exists invite_links_wedding_id_idx on public.invite_links(wedding_id);
 
 -- Tag each response with the link it arrived through (null = Direct). Deleting a
--- link keeps its responses, just un-groups them. `phone` is captured via links.
+-- link keeps its responses, just un-groups them.
 alter table public.rsvps add column if not exists invite_link_id uuid
   references public.invite_links(id) on delete set null;
-alter table public.rsvps add column if not exists phone text;
 create index if not exists rsvps_invite_link_id_idx on public.rsvps(invite_link_id);
 
 -- A guest's RSVP insert (run as anon) needs to confirm the link it stamps belongs
@@ -204,6 +203,158 @@ $$;
 
 revoke all on function public.get_invite_link(uuid, text) from public;
 grant execute on function public.get_invite_link(uuid, text) to anon, authenticated;
+
+-- ===========================================================================
+-- Guest roster (the master guest list)
+-- The couple pre-loads expected guests by name; each row gets a private token,
+-- so the guest opens /<slug>?g=<token>, sees their name, and RSVPs once
+-- (editable). This is the source of truth for "who's invited / who's pending".
+-- Open invite_links (above) still exist for forwardable distribution — those
+-- responses have a NULL guest_id and show up as "Unlisted".
+-- ===========================================================================
+create table if not exists public.guests (
+  id                  uuid        primary key default gen_random_uuid(),
+  wedding_id          uuid        not null references public.weddings(id) on delete cascade,
+  name                text        not null,
+  expected_party_size integer     not null default 1 check (expected_party_size >= 1),
+  token               text        not null unique default substr(md5(gen_random_uuid()::text), 1, 12),
+  created_at          timestamptz not null default now()
+);
+create index if not exists guests_wedding_id_idx on public.guests(wedding_id);
+
+-- Tie a response to a roster guest (null = unlisted: open-link or direct).
+-- ON DELETE SET NULL keeps a response if the couple removes the roster entry.
+alter table public.rsvps add column if not exists guest_id uuid
+  references public.guests(id) on delete set null;
+create index if not exists rsvps_guest_id_idx on public.rsvps(guest_id);
+-- At most one response per roster guest (multiple NULLs allowed for unlisted).
+create unique index if not exists rsvps_guest_id_key
+  on public.rsvps(guest_id) where guest_id is not null;
+
+alter table public.guests enable row level security;
+
+-- guests: only the owning couple may read/manage their roster. Guests never read
+-- the table directly — the public page resolves a single entry via get_guest().
+drop policy if exists "guests_select_owner" on public.guests;
+create policy "guests_select_owner"
+  on public.guests for select
+  to authenticated
+  using (exists (select 1 from public.weddings w where w.id = guests.wedding_id and w.owner_id = auth.uid()));
+
+drop policy if exists "guests_insert_owner" on public.guests;
+create policy "guests_insert_owner"
+  on public.guests for insert
+  to authenticated
+  with check (exists (select 1 from public.weddings w where w.id = wedding_id and w.owner_id = auth.uid()));
+
+drop policy if exists "guests_update_owner" on public.guests;
+create policy "guests_update_owner"
+  on public.guests for update
+  to authenticated
+  using (exists (select 1 from public.weddings w where w.id = guests.wedding_id and w.owner_id = auth.uid()))
+  with check (exists (select 1 from public.weddings w where w.id = wedding_id and w.owner_id = auth.uid()));
+
+drop policy if exists "guests_delete_owner" on public.guests;
+create policy "guests_delete_owner"
+  on public.guests for delete
+  to authenticated
+  using (exists (select 1 from public.weddings w where w.id = guests.wedding_id and w.owner_id = auth.uid()));
+
+-- get_guest: resolve a public ?g=<token> to its single roster entry, scoped to a
+-- published wedding, and include any RSVP already on file so the form can prefill
+-- (and let the guest edit). SECURITY DEFINER so anonymous guests read just the
+-- one row their token unlocks — never the roster.
+drop function if exists public.get_guest(uuid, text);
+create or replace function public.get_guest(p_wedding_id uuid, p_token text)
+returns table (
+  id                  uuid,
+  name                text,
+  expected_party_size integer,
+  has_rsvp            boolean,
+  rsvp_attending      boolean,
+  rsvp_party_size     integer,
+  rsvp_message        text
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select g.id, g.name, g.expected_party_size,
+         (r.id is not null) as has_rsvp,
+         r.attending        as rsvp_attending,
+         r.party_size       as rsvp_party_size,
+         r.message          as rsvp_message
+  from public.guests g
+  join public.weddings w on w.id = g.wedding_id
+  left join public.rsvps r on r.guest_id = g.id
+  where g.wedding_id = p_wedding_id
+    and g.token = p_token
+    and w.published
+  limit 1;
+$$;
+
+revoke all on function public.get_guest(uuid, text) from public;
+grant execute on function public.get_guest(uuid, text) to anon, authenticated;
+
+-- submit_guest_rsvp: a roster guest's RSVP, gated entirely by their private
+-- token (their only credential). SECURITY DEFINER so anon can upsert exactly one
+-- response for the guest the token resolves to — no direct write access to rsvps
+-- needed, and replies are naturally de-duped and editable.
+drop function if exists public.submit_guest_rsvp(uuid, text, boolean, integer, text, text);
+create or replace function public.submit_guest_rsvp(
+  p_wedding_id uuid,
+  p_token      text,
+  p_attending  boolean,
+  p_party_size integer,
+  p_message    text
+)
+returns void
+language plpgsql
+volatile
+security definer
+set search_path = public
+as $$
+declare
+  v_guest_id uuid;
+  v_name     text;
+  v_size     integer;
+begin
+  select g.id, g.name into v_guest_id, v_name
+  from public.guests g
+  join public.weddings w on w.id = g.wedding_id
+  where g.wedding_id = p_wedding_id
+    and g.token = p_token
+    and w.published
+  limit 1;
+
+  if v_guest_id is null then
+    raise exception 'Invalid or expired invitation link.';
+  end if;
+
+  -- Clamp to a sane head-count; a regret records 0.
+  v_size := greatest(0, least(coalesce(p_party_size, 1), 20));
+  if not coalesce(p_attending, true) then
+    v_size := 0;
+  end if;
+
+  if exists (select 1 from public.rsvps where guest_id = v_guest_id) then
+    update public.rsvps
+      set attending  = coalesce(p_attending, true),
+          party_size = v_size,
+          message    = nullif(btrim(p_message), ''),
+          name       = v_name
+      where guest_id = v_guest_id;
+  else
+    insert into public.rsvps (wedding_id, name, party_size, attending, message, guest_id)
+    values (p_wedding_id, v_name, v_size, coalesce(p_attending, true),
+            nullif(btrim(p_message), ''), v_guest_id);
+  end if;
+end;
+$$;
+
+revoke all on function public.submit_guest_rsvp(uuid, text, boolean, integer, text) from public;
+grant execute on function public.submit_guest_rsvp(uuid, text, boolean, integer, text) to anon, authenticated;
 
 -- ===========================================================================
 -- Auto-create a wedding when a couple signs up.

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { submitRsvp } from "@/lib/supabase";
+import { submitRsvp, submitGuestRsvp } from "@/lib/supabase";
 import SectionHeading from "./SectionHeading";
 import Reveal from "./Reveal";
 
@@ -16,21 +16,50 @@ export type InviteContext = {
   expectedCount: number;
 };
 
+// A pre-loaded roster guest, resolved server-side from ?g=<token>. Their name is
+// locked, their reply is one-per-guest and editable (`existing` is prefilled when
+// they've already responded).
+export type GuestContext = {
+  token: string;
+  name: string;
+  expectedPartySize: number;
+  existing: {
+    attending: boolean;
+    partySize: number;
+    message: string;
+  } | null;
+};
+
 export default function RsvpForm({
   weddingId,
   invite,
+  guest,
 }: {
   weddingId: string;
   invite?: InviteContext | null;
+  guest?: GuestContext | null;
 }) {
   const personal = invite?.kind === "personal";
-  const [name, setName] = useState(personal ? invite!.label : "");
-  const [partySize, setPartySize] = useState(invite?.expectedCount || 1);
-  const [attending, setAttending] = useState(true);
-  const [message, setMessage] = useState("");
-  const [phone, setPhone] = useState("");
+
+  // Initial field values differ by mode. A roster guest prefills from their
+  // existing reply (edit) or their expected head-count (first time).
+  const initialName = guest ? guest.name : personal ? invite!.label : "";
+  const initialParty =
+    guest?.existing?.partySize ??
+    guest?.expectedPartySize ??
+    invite?.expectedCount ??
+    1;
+  const initialAttending = guest?.existing?.attending ?? true;
+
+  const [name, setName] = useState(initialName);
+  const [partySize, setPartySize] = useState(initialParty);
+  const [attending, setAttending] = useState(initialAttending);
+  const [message, setMessage] = useState(guest?.existing?.message ?? "");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+
+  // True once a roster guest has a reply on file (initially or after submitting).
+  const [alreadyReplied, setAlreadyReplied] = useState(Boolean(guest?.existing));
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,31 +70,55 @@ export default function RsvpForm({
     }
     setStatus("loading");
     setError("");
-    const { error } = await submitRsvp({
-      wedding_id: weddingId,
-      name: name.trim(),
-      party_size: attending ? partySize : 0,
-      attending,
-      message: message.trim(),
-      phone: phone.trim(),
-      invite_link_id: invite?.linkId ?? null,
-    });
+
+    const { error } = guest
+      ? await submitGuestRsvp({
+          wedding_id: weddingId,
+          token: guest.token,
+          attending,
+          party_size: attending ? partySize : 0,
+          message: message.trim(),
+        })
+      : await submitRsvp({
+          wedding_id: weddingId,
+          name: name.trim(),
+          party_size: attending ? partySize : 0,
+          attending,
+          message: message.trim(),
+          invite_link_id: invite?.linkId ?? null,
+        });
+
     if (error) {
       setError(error);
       setStatus("error");
     } else {
+      if (guest) setAlreadyReplied(true);
       setStatus("done");
     }
   }
+
+  const eyebrow = guest
+    ? alreadyReplied && guest.existing
+      ? "Your RSVP"
+      : "You're invited"
+    : invite
+    ? `Invited via ${invite.label}`
+    : "Join Us";
+
+  const title = guest
+    ? alreadyReplied && guest.existing
+      ? `Update your RSVP, ${guest.name}`
+      : `Welcome, ${guest.name}`
+    : personal && invite
+    ? `Welcome, ${invite.label}`
+    : "Confirm Your Presence";
 
   return (
     <section id="rsvp" className="py-24">
       <div className="container-x max-w-2xl">
         <SectionHeading
-          eyebrow={invite ? `Invited via ${invite.label}` : "Join Us"}
-          title={
-            personal && invite ? `Welcome, ${invite.label}` : "Confirm Your Presence"
-          }
+          eyebrow={eyebrow}
+          title={title}
           subtitle="Kindly let us know if you'll be joining, and how many guests to expect."
         />
 
@@ -98,16 +151,20 @@ export default function RsvpForm({
                   className="btn-ghost mt-6"
                   onClick={() => {
                     setStatus("idle");
+                    if (guest) {
+                      // Locked to one guest — reopening edits the same reply, so
+                      // keep the current values rather than clearing them.
+                      return;
+                    }
                     // Personal links re-fill the named guest; group/direct clear
                     // so the next person (e.g. someone Dad forwarded to) can reply.
                     setName(personal ? invite!.label : "");
                     setPartySize(invite?.expectedCount || 1);
                     setAttending(true);
                     setMessage("");
-                    setPhone("");
                   }}
                 >
-                  Submit another response
+                  {guest ? "Edit your response" : "Submit another response"}
                 </button>
               </div>
             ) : (
@@ -122,6 +179,9 @@ export default function RsvpForm({
                     placeholder="e.g. Priya Sharma"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    // A roster guest's name is fixed by the couple's list.
+                    readOnly={Boolean(guest)}
+                    aria-readonly={Boolean(guest)}
                   />
                 </div>
 
@@ -188,23 +248,6 @@ export default function RsvpForm({
                   </div>
                 )}
 
-                {invite && (
-                  <div className="animate-fade-up">
-                    <label className="label" htmlFor="phone">
-                      Phone number (optional)
-                    </label>
-                    <input
-                      id="phone"
-                      type="tel"
-                      inputMode="tel"
-                      className="field"
-                      placeholder="e.g. +91 98765 43210"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                    />
-                  </div>
-                )}
-
                 <div>
                   <label className="label" htmlFor="message">
                     A note for the couple (optional)
@@ -227,7 +270,11 @@ export default function RsvpForm({
                   className="btn-primary w-full"
                   disabled={status === "loading"}
                 >
-                  {status === "loading" ? "Sending…" : "Send RSVP"}
+                  {status === "loading"
+                    ? "Sending…"
+                    : alreadyReplied && guest
+                    ? "Update RSVP"
+                    : "Send RSVP"}
                 </button>
               </form>
             )}

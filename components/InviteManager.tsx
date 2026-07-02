@@ -16,7 +16,6 @@ export type Responder = {
   name: string;
   attending: boolean;
   party_size: number;
-  phone: string | null;
   invite_link_id: string | null;
 };
 
@@ -350,11 +349,6 @@ export default function InviteManager({
                                 <p className="truncate font-body text-ink">
                                   {r.name}
                                 </p>
-                                {r.phone && (
-                                  <p className="font-body text-xs text-muted">
-                                    {r.phone}
-                                  </p>
-                                )}
                               </div>
                               <span
                                 className="shrink-0 rounded-full px-3 py-1 font-body text-xs"
