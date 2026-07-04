@@ -83,7 +83,7 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
           {isLogin ? (
             <>
               New here?{" "}
-              <Link href="/signup" className="text-accent hover:underline">
+              <Link href="/coming-soon" className="text-accent hover:underline">
                 Create your wedding
               </Link>
             </>

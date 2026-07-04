@@ -3,8 +3,10 @@ import { createServerClient } from "@supabase/ssr";
 
 // ---------------------------------------------------------------------------
 // Refreshes the Supabase auth session on every request (so server components
-// always see a fresh session) and guards the hosts' dashboard: unauthenticated
-// visitors to /dashboard are bounced to /login.
+// always see a fresh session) and guards the hosts' dashboard. Public sign-ups
+// aren't open yet, so an unauthenticated visitor trying to reach /dashboard is
+// sent to the "coming soon" gate rather than a login they can't get an account
+// for. (Existing owners still sign in at /login, which keeps working.)
 // ---------------------------------------------------------------------------
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -38,9 +40,10 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    return NextResponse.redirect(loginUrl);
+    const gateUrl = request.nextUrl.clone();
+    gateUrl.pathname = "/coming-soon";
+    gateUrl.search = "";
+    return NextResponse.redirect(gateUrl);
   }
 
   return response;

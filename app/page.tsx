@@ -14,5 +14,14 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  return <LandingPageLoader />;
+  // The landing page renders client-only (next/dynamic ssr:false), so the
+  // server HTML is otherwise empty and the maroon royal `body` background
+  // (globals.css) flashes before the cream landing hydrates. This
+  // server-rendered wrapper paints the landing's cream background from the
+  // very first frame, covering the body until LandingPage mounts.
+  return (
+    <div className="landing-page min-h-screen bg-land-background">
+      <LandingPageLoader />
+    </div>
+  );
 }

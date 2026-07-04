@@ -21,8 +21,17 @@ function StatCard({
   );
 }
 
-export default function DashboardView({ data }: { data: DashboardData }) {
+export default function DashboardView({
+  data,
+  demo = false,
+}: {
+  data: DashboardData;
+  demo?: boolean;
+}) {
   const { config, slug, rsvps, inviteLinks, guests } = data;
+  // In the public read-only demo, links to auth-only pages instead point at the
+  // "coming soon" gate — public sign-ups aren't open yet.
+  const manageHref = (path: string) => (demo ? "/coming-soon" : path);
   const attending = rsvps.filter((r) => r.attending);
   const confirmedPeople = attending.reduce((s, r) => s + (r.party_size || 0), 0);
   const declined = rsvps.length - attending.length;
@@ -62,35 +71,53 @@ export default function DashboardView({ data }: { data: DashboardData }) {
               {config.brideName} &amp; {config.groomName}
             </h1>
             <p className="mt-2 font-body text-sm text-muted">
-              Your invitation:{" "}
+              {demo ? "Live invitation: " : "Your invitation: "}
               <Link href={`/${slug}`} className="text-accent hover:underline">
                 /{slug}
               </Link>
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/dashboard/edit" className="btn-primary">
-              Edit content
-            </Link>
-            <Link href="/dashboard/guests" className="btn-ghost">
-              Guest list
-            </Link>
-            <Link href="/dashboard/invites" className="btn-ghost">
-              Open links
-            </Link>
-            <ExportButtons
-              slug={slug}
-              rsvps={rsvps}
-              inviteLinks={inviteLinks}
-            />
-            <Link href={`/${slug}`} className="btn-ghost">
-              View invitation
-            </Link>
-            <form action={logout}>
-              <button type="submit" className="btn-ghost">
-                Log out
-              </button>
-            </form>
+            {demo ? (
+              <>
+                <ExportButtons
+                  slug={slug}
+                  rsvps={rsvps}
+                  inviteLinks={inviteLinks}
+                />
+                <Link href={`/${slug}`} className="btn-ghost">
+                  View invitation
+                </Link>
+                <Link href="/coming-soon" className="btn-primary">
+                  Create your own
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/dashboard/edit" className="btn-primary">
+                  Edit content
+                </Link>
+                <Link href="/dashboard/guests" className="btn-ghost">
+                  Guest list
+                </Link>
+                <Link href="/dashboard/invites" className="btn-ghost">
+                  Open links
+                </Link>
+                <ExportButtons
+                  slug={slug}
+                  rsvps={rsvps}
+                  inviteLinks={inviteLinks}
+                />
+                <Link href={`/${slug}`} className="btn-ghost">
+                  View invitation
+                </Link>
+                <form action={logout}>
+                  <button type="submit" className="btn-ghost">
+                    Log out
+                  </button>
+                </form>
+              </>
+            )}
           </div>
         </div>
 
@@ -128,7 +155,7 @@ export default function DashboardView({ data }: { data: DashboardData }) {
               <div className="mb-4 flex items-center justify-between gap-4">
                 <h2 className="display text-2xl">Confirmed via open links</h2>
                 <Link
-                  href="/dashboard/guests"
+                  href={manageHref("/dashboard/guests")}
                   className="text-accent hover:underline font-body text-sm"
                 >
                   Manage guest list →
@@ -137,7 +164,7 @@ export default function DashboardView({ data }: { data: DashboardData }) {
               {sources.length === 0 ? (
                 <p className="font-body text-sm text-muted">
                   Roster guests are tracked on your{" "}
-                  <Link href="/dashboard/guests" className="text-accent hover:underline">
+                  <Link href={manageHref("/dashboard/guests")} className="text-accent hover:underline">
                     guest list
                   </Link>
                   . This panel only counts confirmations that came in through a

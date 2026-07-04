@@ -8,6 +8,9 @@ import dynamic from "next/dynamic";
 // wrapper — app/page.tsx stays a Server Component so it can export metadata.
 const LandingPage = dynamic(() => import("@/components/LandingPage"), {
   ssr: false,
+  // Cream placeholder matching the landing background so the GSAP chunk
+  // loading window never reveals the maroon royal `body` underneath.
+  loading: () => <div className="min-h-screen bg-land-background" />,
 });
 
 export default function LandingPageLoader() {

@@ -1,8 +1,7 @@
-import type { Metadata } from "next";
-import AuthForm from "../AuthForm";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Sign up — Wed Assist" };
-
+// Public sign-ups aren't open yet — anyone reaching /signup (including by typing
+// the URL directly) is sent to the "coming soon" gate.
 export default function SignupPage() {
-  return <AuthForm mode="signup" />;
+  redirect("/coming-soon");
 }

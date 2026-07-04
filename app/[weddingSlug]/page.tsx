@@ -8,6 +8,8 @@ import Reveal from "@/components/Reveal";
 import Events from "@/components/Events";
 import Gallery from "@/components/Gallery";
 import RsvpForm, { type InviteContext, type GuestContext } from "@/components/RsvpForm";
+import DemoThemeShell from "@/components/DemoThemeShell";
+import { DEMO_SLUG } from "@/lib/demoData";
 
 // Reads per-request from the database (no static generation).
 export const dynamic = "force-dynamic";
@@ -131,8 +133,13 @@ export default async function WeddingPage({
   const user = await getCurrentUser();
   const isOwner = Boolean(user && user.id === ownerId);
 
-  return (
-    <div data-theme={config.theme} className="theme-surface min-h-screen">
+  // The showcase wedding gets the visitor-facing demo treatment (live theme
+  // switcher + a bridge to the read-only host dashboard) — but not when the
+  // real owner is previewing their own page.
+  const isDemo = weddingSlug === DEMO_SLUG && !isOwner;
+
+  const body = (
+    <>
       {isOwner && (
         <div
           className="sticky top-0 z-50 flex items-center justify-between gap-4 border-b px-4 py-2.5 text-sm backdrop-blur"
@@ -146,6 +153,23 @@ export default async function WeddingPage({
           </span>
           <Link href="/dashboard" className="btn-ghost px-4 py-1.5 text-xs">
             ← Back to dashboard
+          </Link>
+        </div>
+      )}
+      {isDemo && (
+        <div
+          className="sticky top-0 z-50 flex flex-wrap items-center justify-between gap-3 border-b px-4 py-2.5 text-sm backdrop-blur"
+          style={{
+            borderColor: "var(--line)",
+            background: "color-mix(in srgb, var(--bg) 80%, transparent)",
+          }}
+        >
+          <span className="font-body text-muted">
+            <span className="text-accent">Live demo</span> — this is the guest&apos;s
+            view. Switch themes below, or peek behind the scenes.
+          </span>
+          <Link href="/demo" className="btn-ghost px-4 py-1.5 text-xs">
+            See the host dashboard →
           </Link>
         </div>
       )}
@@ -172,6 +196,21 @@ export default async function WeddingPage({
           </Reveal>
         </footer>
       </main>
+    </>
+  );
+
+  // Demo: client shell provides the themed surface + live theme switcher.
+  if (isDemo) {
+    return (
+      <DemoThemeShell initial={config.theme} className="min-h-screen">
+        {body}
+      </DemoThemeShell>
+    );
+  }
+
+  return (
+    <div data-theme={config.theme} className="theme-surface min-h-screen">
+      {body}
     </div>
   );
 }
