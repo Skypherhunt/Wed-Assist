@@ -9,3 +9,6 @@ next-env.d.ts
 
 # Internal refactor notes — not part of the published portfolio
 WED_ASSIST_REFACTOR.md
+
+# Local Claude Code tooling config
+/.claude

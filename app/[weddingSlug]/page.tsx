@@ -7,7 +7,7 @@ import Hero from "@/components/Hero";
 import Reveal from "@/components/Reveal";
 import Events from "@/components/Events";
 import Gallery from "@/components/Gallery";
-import RsvpForm, { type InviteContext } from "@/components/RsvpForm";
+import RsvpForm, { type InviteContext, type GuestContext } from "@/components/RsvpForm";
 
 // Reads per-request from the database (no static generation).
 export const dynamic = "force-dynamic";
@@ -56,6 +56,41 @@ async function loadInvite(
   };
 }
 
+// Resolve a public ?g=<token> to its roster guest via the SECURITY DEFINER RPC,
+// including any RSVP already on file so the form can prefill and let them edit.
+async function loadGuest(
+  weddingId: string,
+  token: string | undefined
+): Promise<GuestContext | null> {
+  if (!token) return null;
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return null;
+  const { data } = await supabase
+    .rpc("get_guest", { p_wedding_id: weddingId, p_token: token })
+    .maybeSingle<{
+      id: string;
+      name: string;
+      expected_party_size: number;
+      has_rsvp: boolean;
+      rsvp_attending: boolean | null;
+      rsvp_party_size: number | null;
+      rsvp_message: string | null;
+    }>();
+  if (!data) return null;
+  return {
+    token,
+    name: data.name,
+    expectedPartySize: data.expected_party_size,
+    existing: data.has_rsvp
+      ? {
+          attending: data.rsvp_attending ?? true,
+          partySize: data.rsvp_party_size ?? data.expected_party_size,
+          message: data.rsvp_message ?? "",
+        }
+      : null,
+  };
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -68,6 +103,8 @@ export async function generateMetadata({
   return {
     title: `${brideName} & ${groomName} — Wedding Invitation`,
     description: tagline,
+    // Invitations are shared privately by link — keep them out of search results.
+    robots: { index: false, follow: false },
   };
 }
 
@@ -76,7 +113,7 @@ export default async function WeddingPage({
   searchParams,
 }: {
   params: Promise<Params>;
-  searchParams: Promise<{ i?: string }>;
+  searchParams: Promise<{ i?: string; g?: string }>;
 }) {
   const { weddingSlug } = await params;
   const wedding = await loadWedding(weddingSlug);
@@ -84,8 +121,10 @@ export default async function WeddingPage({
 
   const { id, ownerId, config } = wedding;
 
-  const { i: inviteToken } = await searchParams;
-  const invite = await loadInvite(id, inviteToken);
+  // A roster guest link (?g=) takes priority over an open invite link (?i=).
+  const { i: inviteToken, g: guestToken } = await searchParams;
+  const guest = await loadGuest(id, guestToken);
+  const invite = guest ? null : await loadInvite(id, inviteToken);
 
   // Show a host-only bar when the logged-in user owns this wedding.
   // Guests (logged out, or a different couple) never see it.
@@ -119,7 +158,7 @@ export default async function WeddingPage({
 
         <Events wedding={config} />
         <Gallery photos={config.gallery} />
-        <RsvpForm weddingId={id} invite={invite} />
+        <RsvpForm weddingId={id} invite={invite} guest={guest} />
 
         <footer
           className="border-t py-12 text-center"

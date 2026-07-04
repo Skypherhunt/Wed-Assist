@@ -4,9 +4,14 @@ import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 
 export const metadata: Metadata = {
-  title: "Wed Assist — Beautiful Wedding Invitations",
+  // Absolute base for OG/Twitter image URLs. Set NEXT_PUBLIC_SITE_URL to your
+  // deployed origin (e.g. https://wed-assist.netlify.app) in the host's env.
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+  ),
+  title: "Wed Assist — One link for your whole wedding",
   description:
-    "Create a premium wedding invitation site: RSVPs, events, and gallery — all in one place.",
+    "A beautiful wedding invitation site — events, gallery, RSVPs and a live guest list — all behind a single shareable link.",
 };
 
 export default function RootLayout({

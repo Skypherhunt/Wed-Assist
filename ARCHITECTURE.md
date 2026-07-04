@@ -7,8 +7,9 @@ A walkthrough of the three patterns this project explores: tenant isolation, per
 ### Tables
 
 - `weddings` — one per couple. Owned by an `auth.users` row via `owner_id`. Carries the unique `slug`, a `published` flag, the chosen `theme`, and a `config` JSON blob.
-- `rsvps` — carries `wedding_id`. One row per guest response.
-- `invite_links` — carries `wedding_id`. One row per sub-host link.
+- `guests` — carries `wedding_id`. The couple's master roster; each has a private `token` for a personal RSVP link.
+- `rsvps` — carries `wedding_id`. One row per guest response (optionally stamped with a `guest_id` or `invite_link_id`).
+- `invite_links` — carries `wedding_id`. One row per sub-host link (open, forwardable distribution).
 
 ### Trigger: auto-create tenant on signup
 

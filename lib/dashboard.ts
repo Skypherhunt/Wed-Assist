@@ -1,7 +1,7 @@
 import "server-only";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { resolveWeddingConfig, type WeddingConfig } from "@/config/wedding";
-import type { InviteLink, Rsvp } from "./supabase";
+import type { Guest, InviteLink, Rsvp } from "./supabase";
 
 // ---------------------------------------------------------------------------
 // Dashboard data, scoped to the logged-in couple. Reads run with the user's
@@ -15,6 +15,7 @@ export interface DashboardData {
   config: WeddingConfig;
   rsvps: Rsvp[];
   inviteLinks: InviteLink[];
+  guests: Guest[];
 }
 
 // Returns the dashboard payload for the current user, or:
@@ -41,7 +42,7 @@ export async function fetchDashboardData(): Promise<
 
   if (!wedding) return "no-wedding";
 
-  const [rsvpRes, linksRes] = await Promise.all([
+  const [rsvpRes, linksRes, guestsRes] = await Promise.all([
     supabase
       .from("rsvps")
       .select("*")
@@ -49,6 +50,11 @@ export async function fetchDashboardData(): Promise<
       .order("created_at", { ascending: false }),
     supabase
       .from("invite_links")
+      .select("*")
+      .eq("wedding_id", wedding.id)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("guests")
       .select("*")
       .eq("wedding_id", wedding.id)
       .order("created_at", { ascending: true }),
@@ -60,5 +66,6 @@ export async function fetchDashboardData(): Promise<
     config: resolveWeddingConfig(wedding.config as Partial<WeddingConfig>),
     rsvps: (rsvpRes.data as Rsvp[]) ?? [],
     inviteLinks: (linksRes.data as InviteLink[]) ?? [],
+    guests: (guestsRes.data as Guest[]) ?? [],
   };
 }
