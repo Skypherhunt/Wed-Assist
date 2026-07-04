@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# Netlify's official Next.js runtime. Handles the App Router, server
+# components, middleware, and per-route SSR/edge functions automatically —
+# no manual function or redirect config needed.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  # Pin the Node major so builds are reproducible and don't break on a
+  # surprise Netlify default bump. Next 15 needs >=18.18; 20 is current LTS.
+  NODE_VERSION = "20"
