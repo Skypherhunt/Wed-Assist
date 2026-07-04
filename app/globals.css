@@ -452,5 +452,12 @@ body::before {
   .mask-line {
     overflow: hidden;
     display: block;
+    /* The reveal slides each line up from below, so the clip box has to be
+       overflow:hidden — but a tight display-font leading (e.g. hero's 0.92)
+       then chops glyph descenders (the "y" in your, the "g" in wedding.).
+       Pad the bottom for descender room and pull it back with a matching
+       negative margin so the visual line-spacing is unchanged. */
+    padding-bottom: 0.18em;
+    margin-bottom: -0.18em;
   }
 }

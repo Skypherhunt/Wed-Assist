@@ -8,7 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
   ArrowUpRight, ArrowRight, ArrowLeft, Heart, Star, Check, ChevronDown, Sparkles,
   Palette, Share2, ClipboardList, ShieldCheck, MessageCircle, Link2, Download,
-  CalendarHeart, MapPin, Users, Quote,
+  CalendarHeart, MapPin, Users,
 } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -177,7 +177,7 @@ function RsvpSignature() {
   const statuses = [
     { text: 'New RSVP · attending', label: 'Yes', tone: 'primary' },
     { text: 'Party of 4 confirmed', label: 'Guests', tone: 'accent' },
-    { text: 'Meal choices saved', label: 'Menu', tone: 'emerald' },
+    { text: 'A warm note attached', label: 'Note', tone: 'emerald' },
     { text: 'Guest list synced', label: 'Done', tone: 'emerald' },
   ]
   useEffect(() => {
@@ -308,13 +308,13 @@ function Hero() {
             <span className="h-px w-16 bg-land-primary/40" />
           </div>
           <h1 className="font-display text-[3.4rem] sm:text-7xl lg:text-[6rem] leading-[0.92] tracking-tight text-land-ink">
-            <span className="mask-line"><span className="reveal-inner block">One link for</span></span>
-            <span className="mask-line"><span className="reveal-inner block">your <span className="font-serif italic text-land-primary">whole</span></span></span>
+            <span className="mask-line"><span className="reveal-inner block">One link.</span></span>
+            <span className="mask-line"><span className="reveal-inner block">Your <span className="font-serif italic text-land-primary">whole</span></span></span>
             <span className="mask-line"><span className="reveal-inner block">wedding.</span></span>
           </h1>
           <p className="hero-fade mt-8 max-w-md text-land-muted text-base sm:text-lg leading-relaxed">
-            A beautiful invitation site — your events, gallery, RSVPs and a live guest list — all
-            behind a single link your families will actually love using.
+            One site for every event, your gallery and RSVPs — plus a private link for each guest,
+            so you always know exactly who’s replied.
           </p>
           <div className="hero-fade mt-10 flex flex-wrap items-center gap-6">
             <a href={DEMO_URL} target="_blank" rel="noreferrer" className="magnetic-btn inline-flex items-center gap-2 bg-land-ink text-land-background px-7 py-3.5 rounded-full font-semibold shadow-xl shadow-land-ink/20">
@@ -359,7 +359,7 @@ function Hero() {
 function MarqueeBand() {
   return (
     <section className="bg-land-ink text-land-background py-5 border-y border-land-ink">
-      <Marquee items={['Your themes', 'Live RSVPs', 'One shareable link', 'Guest list', 'Photo gallery', 'Every event', 'CSV export']} />
+      <Marquee items={['Your themes', 'Live RSVPs', 'A link per guest', 'Guest list', 'Photo gallery', 'Every event', 'CSV export']} />
     </section>
   )
 }
@@ -369,7 +369,7 @@ function MarqueeBand() {
 ================================================================ */
 const TOUR = [
   { n: '01', title: 'Your invitation', text: 'A full-screen invite with your story, hashtag and date — in a theme that feels like you two.', mock: <PhoneMock variant="invite" /> },
-  { n: '02', title: 'Guests RSVP in taps', text: 'No account, no app. Guests open your link, say yes, pick a party size and meal — done.', mock: <PhoneMock variant="rsvp" /> },
+  { n: '02', title: 'Guests RSVP in taps', text: 'No account, no app. Guests open your link, say yes, pick a party size and leave a note — done.', mock: <PhoneMock variant="rsvp" /> },
   { n: '03', title: 'You watch it fill up', text: 'Every reply lands on your dashboard live, with headcounts and a breakdown by invite source.', mock: <BrowserMock variant="dashboard" /> },
   { n: '04', title: 'One guest list, sorted', text: 'A master list that dedupes itself — attending, pending, declined — export it whenever you like.', mock: <BrowserMock variant="guests" /> },
 ]
@@ -464,7 +464,7 @@ function Features() {
               <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-land-muted">Live RSVP feed</span>
             </div>
             <h3 className="font-display text-2xl sm:text-3xl text-land-ink mb-1">Watch the “yes”es roll in</h3>
-            <p className="text-land-muted text-sm leading-relaxed mb-5 max-w-md">Every reply arrives the moment a guest submits — with party size, meals and a message. Your headcount updates itself.</p>
+            <p className="text-land-muted text-sm leading-relaxed mb-5 max-w-md">Every reply arrives the moment a guest submits — with party size and a message. Your headcount updates itself.</p>
             <div className="flex-1 min-h-[13rem]"><RsvpSignature /></div>
           </div>
           {/* Themes tile */}
@@ -493,7 +493,7 @@ function Features() {
           {/* Small tiles row */}
           {[
             { icon: ClipboardList, t: 'Master guest list', d: 'Auto-deduped, editable, always the source of truth.' },
-            { icon: Download, t: 'Excel-safe export', d: 'One click. Names, status, party, source, meals.' },
+            { icon: Download, t: 'Excel-safe export', d: 'One click. Names, status, party, source, notes.' },
             { icon: ShieldCheck, t: 'Private by default', d: 'Unpublished until you’re ready; data isolated per couple.' },
           ].map((f, i) => (
             <div key={i} className="bento-tile lg:col-span-4 rounded-3xl bg-land-surface hairline p-6">
@@ -608,7 +608,7 @@ function CountUp({ end, suffix = '', duration = 1800 }: { end: number; suffix?: 
 const STATS = [
   { end: 8, suffix: '', text: 'handcrafted themes, each with its own fonts & palette' },
   { end: 60, suffix: 's', text: 'from sign-up to a live wedding site you can share' },
-  { end: 100, suffix: '%', text: 'of your RSVPs, headcounts & meals on one dashboard' },
+  { end: 100, suffix: '%', text: 'of your RSVPs, headcounts & notes on one dashboard' },
 ]
 
 function StatBand() {
@@ -639,20 +639,26 @@ function Testimonial() {
       <div className="max-w-4xl mx-auto px-6 sm:px-10">
         <div className="relative rotate-[-1.5deg] rounded-3xl bg-land-surface hairline edge-shadow p-8 sm:p-14">
           <span className="absolute -top-3 left-1/2 -translate-x-1/2 h-6 w-28 rounded-sm bg-land-primary/20 rotate-[-2deg]" />
-          <Quote className="h-10 w-10 text-land-primary/30 mb-6" />
+          <div className="flex items-center gap-2 mb-6">
+            <Sparkles className="h-5 w-5 text-land-primary" strokeWidth={2.3} />
+            <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-land-primary">The demo wedding</span>
+          </div>
           <blockquote className="font-serif italic text-2xl sm:text-4xl text-land-ink leading-snug">
-            We sent one link to both our families and watched every RSVP land in real time. Wed Assist
-            made the most chaotic part of wedding planning feel calm.
+            Aarav &amp; Diya is our fully built sample wedding — one link with every event, a photo
+            gallery and live RSVPs you can click through, exactly as your guests would.
           </blockquote>
           <div className="mt-10 flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
               <span className="flex h-14 w-14 items-center justify-center rounded-full bg-land-primary/15 font-display text-lg text-land-primary-dark">A&amp;D</span>
               <div>
                 <p className="font-display font-semibold text-land-ink">Aarav &amp; Diya</p>
-                <p className="text-land-muted text-sm flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Married Dec 2026 · Jaipur</p>
+                <p className="text-land-muted text-sm flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> A sample invitation · Jaipur</p>
               </div>
             </div>
-            <span className="flex items-center gap-0.5">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-5 w-5 fill-land-accent text-land-accent" />)}</span>
+            <a href={DEMO_URL} target="_blank" rel="noreferrer" className="group inline-flex items-center gap-1.5 font-display text-land-ink">
+              <span className="border-b-2 border-land-primary pb-0.5 group-hover:border-land-ink transition-colors">Explore the live demo</span>
+              <ArrowUpRight className="h-4 w-4 text-land-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </a>
           </div>
         </div>
       </div>
@@ -666,7 +672,7 @@ function Testimonial() {
 function InviteCTA() {
   const included = [
     'Your own wedding site + shareable link', 'All 8 premium themes to switch between',
-    'Unlimited events, venues, maps & photos', 'Live RSVP dashboard + guest list',
+    'Every event with venues, maps & a photo gallery', 'Live RSVP dashboard + guest list',
     'Group & private invite links with tracking', 'One-click CSV export of your list',
   ]
   return (
@@ -710,7 +716,7 @@ const FAQ = [
   { q: 'Is it really free to start?', a: 'Yes. You can create your wedding site, pick a theme, add your events and photos, and share your link without paying anything. Explore the live demo to see exactly what you get.' },
   { q: 'Do my guests need an account?', a: 'No. Guests simply open your link and RSVP in a few taps — no login, no app to download. You’re the only one who signs in, to manage everything from your dashboard.' },
   { q: 'Can I use my own photos, events and wording?', a: 'Absolutely. Everything is editable in-app: your names, date, hashtag, a tagline in your own words, every function with its venue and map, and a full photo gallery you upload yourself.' },
-  { q: 'How do I know who’s coming?', a: 'Your dashboard shows every reply the moment it arrives — attending or not, party size, meal choices and messages — and even which invite link each response came from.' },
+  { q: 'How do I know who’s coming?', a: 'Your dashboard shows every reply the moment it arrives — attending or not, party size and messages — and even which invite link each response came from.' },
   { q: 'Can I change my theme later?', a: 'Any time. Switching themes is a single click and instantly restyles your whole invitation — fonts, colours and all — without touching your content.' },
   { q: 'Who can see my wedding page?', a: 'Only the people you share the link with. Your page stays unpublished until you’re ready, and your data is isolated per couple at the database level.' },
 ]
@@ -782,7 +788,6 @@ function Footer() {
           <div className="flex items-center gap-6 font-mono text-[11px] uppercase tracking-[0.15em]">
             <a href="#home" className="hover:text-land-background transition-colors">Top</a>
             <a href="#faq" className="hover:text-land-background transition-colors">FAQ</a>
-            <a href="https://github.com/Skypherhunt/Wed-Assist" target="_blank" rel="noreferrer" className="hover:text-land-background transition-colors">View source</a>
           </div>
         </div>
       </div>
@@ -796,7 +801,15 @@ function Footer() {
 function StickyCTA() {
   const [show, setShow] = useState(false)
   useEffect(() => {
-    const onScroll = () => setShow(window.scrollY > window.innerHeight * 0.9)
+    const onScroll = () => {
+      const scrolledEnough = window.scrollY > window.innerHeight * 0.9
+      // Hide once the footer comes into view so the floating CTA never
+      // overlaps the footer links at the very bottom of the page.
+      const nearBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 220
+      setShow(scrolledEnough && !nearBottom)
+    }
+    onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
